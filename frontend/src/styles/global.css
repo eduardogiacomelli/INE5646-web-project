@@ -1,0 +1,153 @@
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  line-height: 1.6;
+  /* Ajuste para um fundo mais unificado - o Pico usa branco por padrão para o body se não especificado.
+     Se quiser um cinza claro consistente, pode usar:
+     background-color: var(--pico-secondary-background, #f8f9fa); 
+     Ou deixar o padrão do Pico (geralmente branco ou cinza muito claro para o modo claro).
+     Vamos tentar o padrão do Pico para ver se agrada mais.
+  */
+  /* background-color: var(--pico-background-color, white); */ /* Tentativa 1: Fundo principal do Pico */
+  background-color: #fdfdff; /* Tentativa 2: Um branco ligeiramente azulado muito claro e suave */
+
+}
+
+main.container {
+  padding-top: 1.5rem; 
+  padding-bottom: 2rem;
+  background-color: var(--pico-card-background-color, white); /* Garante que a área de conteúdo principal tenha um fundo definido */
+  border-radius: var(--pico-border-radius, 0.25rem);
+  box-shadow: var(--pico-box-shadow, 0 1px 3px rgba(0,0,0,0.05));
+  margin-top: 1.5rem; /* Espaço entre navbar e conteúdo principal */
+  margin-bottom: 1.5rem; /* Espaço entre conteúdo principal e footer */
+}
+
+
+/* Estilo para a seção de funcionalidades na HomePage */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.feature-card {
+  border: 1px solid var(--pico-card-border-color, #e0e0e0);
+  border-radius: var(--pico-border-radius, 0.25rem);
+  padding: 1.5rem;
+  background-color: var(--pico-card-background-color, white);
+  box-shadow: var(--pico-card-box-shadow, 0 1px 3px 0 rgba(0,0,0,0.05), 0 1px 2px 0 rgba(0,0,0,0.03));
+}
+
+.feature-card h3 {
+  margin-top: 0;
+  color: var(--pico-primary, #3f51b5);
+}
+
+.feature-card .icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  margin-top: auto; 
+  border-top: 1px solid var(--pico-muted-border-color, #e5e7eb);
+  font-size: 0.9rem;
+  color: var(--pico-muted-color, #6b7280);
+  /* background-color: var(--pico-card-background-color); */ /* Removido para não destoar se body tiver cor */
+}
+
+/* Estilos para o Quadro Kanban (mantidos por enquanto, mas serão removidos se simplificarmos para tabela) */
+.task-monitoring-page {
+  padding-bottom: 2rem;
+}
+
+.kanban-board.grid {
+  grid-template-columns: repeat(4, 1fr); 
+  align-items: flex-start; 
+  gap: 1.5rem; 
+}
+
+@media (max-width: 1200px) {
+  .kanban-board.grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+@media (max-width: 768px) {
+  .kanban-board.grid {
+    grid-template-columns: 1fr; 
+  }
+}
+
+
+.kanban-column > article { 
+  background-color: var(--pico-card-sectionning-background-color, #f8f9fa);
+  border-radius: var(--pico-border-radius);
+  border: 1px solid var(--pico-card-border-color, #e0e0e0);
+  min-height: 200px;
+  display: flex; 
+  flex-direction: column;
+  height: 100%; 
+}
+
+.kanban-column header {
+  position: sticky;
+  top: 0; 
+  background-color: inherit; 
+  z-index: 1; 
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid var(--pico-primary-focus, #303f9f);
+}
+
+.kanban-column header h3 {
+  margin: 0;
+  font-size: 1.2em;
+}
+
+.kanban-column .task-list-container { 
+  padding: 0 0.5rem 0.5rem 0.5rem;
+  flex-grow: 1;
+  overflow-y: auto; 
+  max-height: calc(100vh - 250px); 
+}
+
+
+.task-card {
+  background-color: var(--pico-card-background-color, white);
+  border-radius: var(--pico-border-radius);
+  box-shadow: var(--pico-box-shadow, 0 2px 4px rgba(0,0,0,0.05));
+  margin-bottom: 1rem; 
+}
+.task-card header, .task-card footer {
+    background-color: transparent; 
+}
+
+/* Tabela responsiva para TaskMonitoringPage simplificada */
+.monitoring-table-container .overflow-auto {
+  margin-top: 1.5rem;
+}
+
+.monitoring-table-container th, .monitoring-table-container td {
+  padding: 0.75rem; /* Aumenta um pouco o padding para melhor leitura */
+}
+
+.monitoring-table-container .status-select {
+  min-width: 150px; /* Garante que o select tenha uma largura mínima */
+}
+
+.monitoring-table-container .actions-cell {
+  min-width: 180px; /* Espaço para botões de editar/excluir */
+  text-align: right;
+}
+
+.monitoring-table-container .actions-cell button {
+  margin-left: 0.5rem;
+}
+
