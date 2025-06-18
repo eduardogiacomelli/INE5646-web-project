@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AA12 - Cadastro Avançado e APIs</title>
+    <link rel="stylesheet" href="./css/styleAA12.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="./js/dropdown.js" defer></script>
+    <script src="./js/scriptAA12.js" defer></script>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <button class="nav-button" id="homeBtnNav">
+                <i class="material-icons">home</i>
+                <span>Início</span>
+            </button>
+            <div class="nav-user-menu">
+                <button class="nav-button dropbtn" id="userMenuBtn">
+                    <i class="material-icons">account_circle</i>
+                    <span id="userMenuText">Conta</span>
+                </button>
+                <div id="accountDropdown" class="dropdown-content">
+                    <a href="#" id="loginLinkNav">Fazer Login</a>
+                    <hr>
+                    <a href="#" id="createAccountLinkNav">Criar Conta</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div id="divHomeAA12" class="page-section active-section">
+            <header class="section-header">
+                <h1>Bem-vindo à Prática AA12!</h1>
+            </header>
+            <p>Esta atividade aprimora o cadastro de usuários com busca de endereço por CEP e, após o login, permite a consulta de localidades do IBGE.</p>
+            <p>Utilize o menu <i class="material-icons" style="font-size: 1em; vertical-align: middle;">account_circle</i> para acessar as opções de Login ou Criação de Conta.</p>
+        </div>
+
+        <div id="divLoginAA12" class="page-section">
+            <header class="section-header">
+                <h1><i class="material-icons">login</i> Entrar</h1>
+            </header>
+            <form id="loginFormAA12" class="styled-form">
+                <div class="form-group">
+                    <label for="loginEmail">E-mail:</label>
+                    <input type="email" id="loginEmail" name="loginEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Senha:</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="loginPassword" name="loginPassword" required>
+                        <i class="material-icons password-toggle" id="loginPasswordToggle">visibility</i>
+                    </div>
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="loginManterConectado" name="manterConectado">
+                    <label for="loginManterConectado">Manter conectado</label>
+                </div>
+                <button type="submit" id="loginButtonAA12" class="button primary-button" disabled>Entrar</button>
+            </form>
+        </div>
+
+        <div id="divNovaContaAA12" class="page-section">
+            <header class="section-header">
+                <h1><i class="material-icons">person_add</i> Criar Nova Conta</h1>
+            </header>
+            <form id="novaContaFormAA12" class="styled-form">
+                <h2>Dados Pessoais</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inputNome">Nome:</label>
+                        <input type="text" id="inputNome" name="nome" required>
+                        <p class="status-message" id="statusNome"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputSobrenome">Sobrenome:</label>
+                        <input type="text" id="inputSobrenome" name="sobrenome" required>
+                        <p class="status-message" id="statusSobrenome"></p>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inputCPF">CPF:</label>
+                        <input type="text" id="inputCPF" name="cpf" placeholder="000.000.000-00" required>
+                        <p class="status-message" id="statusCPF"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputEmailNovaConta">E-mail:</label>
+                        <input type="email" id="inputEmailNovaConta" name="email" required>
+                        <p class="status-message" id="statusEmail"></p>
+                    </div>
+                </div>
+
+                <h2>Endereço</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inputCEP">CEP:</label>
+                        <input type="text" id="inputCEP" name="cep" placeholder="00000-000" required>
+                        <p class="status-message" id="statusCEPMessage"></p>
+                    </div>
+                </div>
+                 <div class="form-row">
+                    <div class="form-group">
+                        <label for="inputLogradouro">Logradouro:</label>
+                        <input type="text" id="inputLogradouro" name="logradouro" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputNumeroEndereco">Número:</label>
+                        <input type="text" id="inputNumeroEndereco" name="numeroEndereco">
+                         <p class="status-message" id="statusNumero"></p>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inputBairro">Bairro:</label>
+                        <input type="text" id="inputBairro" name="bairro" readonly>
+                    </div>
+                     <div class="form-group">
+                        <label for="inputComplemento">Complemento:</label>
+                        <input type="text" id="inputComplemento" name="complemento">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inputMunicipio">Município:</label>
+                        <input type="text" id="inputMunicipio" name="municipio" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputUF">Estado (UF):</label>
+                        <input type="text" id="inputUF" name="uf" readonly>
+                    </div>
+                </div>
+
+                <h2>Senha</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inputSenhaNovaConta">Senha:</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="inputSenhaNovaConta" name="senha" required>
+                            <i class="material-icons password-toggle" id="novaContaPasswordToggle">visibility</i>
+                        </div>
+                        <p class="status-message" id="statusSenha"></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputRepitaSenha">Repita sua Senha:</label>
+                         <div class="password-wrapper">
+                            <input type="password" id="inputRepitaSenha" name="repitaSenha" required>
+                            <i class="material-icons password-toggle" id="repitaSenhaPasswordToggle">visibility</i>
+                        </div>
+                        <p class="status-message" id="statusRepitaSenha"></p>
+                    </div>
+                </div>
+                <button type="submit" id="criarContaButtonAA12" class="button primary-button" disabled>Criar Conta</button>
+            </form>
+        </div>
+
+        <div id="divLoggedInContentAA12" class="page-section">
+            <header class="section-header">
+                <h1><i class="material-icons">admin_panel_settings</i> Painel do Usuário</h1>
+                <p>Bem-vindo(a), <span id="loggedInUserName">Usuário</span>!</p>
+            </header>
+            
+            <section class="ibge-lookup">
+                <h2>Consulta de Localidades (IBGE)</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="selectUF_IBGE">Estado (UF):</label>
+                        <select id="selectUF_IBGE" name="uf_ibge">
+                            <option value="">Carregando UFs...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="selectMunicipio_IBGE">Município:</label>
+                        <select id="selectMunicipio_IBGE" name="municipio_ibge" disabled>
+                            <option value="">Selecione um Estado primeiro</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+            <button id="logoutButtonAA12" class="button secondary-button">Sair (Logout)</button>
+        </div>
+    </main>
+
+    <footer>
+        <p>© <span id="currentYear"></span> INE5646 - Programação para Web - AA12</p>
+    </footer>
+</body>
+</html>
