@@ -1,4 +1,3 @@
-// frontend/src/pages/TaskMonitoringPage.tsx (VERSÃO FINAL REFINADA COM ACORDEÃO)
 import React, { useState, useEffect, useRef } from 'react';
 import type { FormEvent } from 'react';
 import { useAuth } from '../contexts/AuthContext';

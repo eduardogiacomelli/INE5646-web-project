@@ -1,4 +1,3 @@
-// frontend/src/pages/UserTasksPage.tsx (VERSÃO FINAL CORRIGIDA)
 import React, { useState, useEffect, useRef } from 'react';
 import type { FormEvent } from 'react';
 import { useAuth } from '../contexts/AuthContext';
@@ -100,7 +99,6 @@ const UserTasksPage: React.FC = () => {
     setModalMode(mode);
     setFormError(null);
     if (mode === 'edit' && task) {
-      // CORREÇÃO DEFINITIVA: Garante que os dados da tarefa a ser editada sejam carregados no formulário
       setCurrentTaskData({
         title: task.title,
         description: task.description || '',

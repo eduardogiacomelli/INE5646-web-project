@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { FormEvent } from 'react'; // <--- CORRIGIDO
+import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';

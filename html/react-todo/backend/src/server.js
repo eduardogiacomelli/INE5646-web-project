@@ -4,22 +4,13 @@ const colors = require('colors'); // Para logs coloridos no console
 const cors = require('cors');
 const path = require('path'); // Módulo 'path' do Node.js
 
-// Importar arquivos de rota
 const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const memberRoutes = require('./routes/memberRoutes');
 
-// Importar conexão com o banco de dados
 const connectDB = require('./config/db');
 
-// Importar middleware de tratamento de erros 
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
-
-
-
-
-
-
 // Conectar ao MongoDB
 connectDB();
 
@@ -47,8 +38,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-
 
 
 // Middleware para parsear o corpo das requisições JSON

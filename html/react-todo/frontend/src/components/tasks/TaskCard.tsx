@@ -1,4 +1,3 @@
-// frontend/src/components/tasks/TaskCard.tsx
 import React from 'react';
 
 // Importando os tipos que serão definidos na página que usar este card.

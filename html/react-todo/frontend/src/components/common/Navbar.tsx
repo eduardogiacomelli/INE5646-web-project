@@ -1,4 +1,3 @@
-// frontend/src/components/common/Navbar.tsx (VERSÃO FINAL, RESPONSIVA E SEM CSS EXTERNO)
 import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';

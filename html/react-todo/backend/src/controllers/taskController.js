@@ -1,7 +1,6 @@
-// backend/src/controllers/taskController.js (VERSÃO COMPLETA E CORRIGIDA)
-const mongoose = require('mongoose');
-const Task = require('../models/Task');
-const Member = require('../models/Member');
+const mongoose = require("mongoose");
+const Task = require("../models/Task");
+const Member = require("../models/Member");
 
 /**
  * @desc    Criar uma nova tarefa
@@ -10,32 +9,61 @@ const Member = require('../models/Member');
  */
 exports.createTask = async (req, res) => {
   // Define um valor padrão '[]' se o frontend não enviar o campo.
-  const { title, description, status, priority, assignedMemberIds = [], dueDate } = req.body;
+  const {
+    title,
+    description,
+    status,
+    priority,
+    assignedMemberIds = [],
+    dueDate,
+  } = req.body;
   const userId = req.user.id;
 
   try {
     // Valida se todos os membros enviados existem e pertencem ao usuário.
     if (assignedMemberIds && assignedMemberIds.length > 0) {
-      const members = await Member.find({ '_id': { $in: assignedMemberIds }, createdByUserId: userId });
+      const members = await Member.find({
+        _id: { $in: assignedMemberIds },
+        createdByUserId: userId,
+      });
       if (members.length !== assignedMemberIds.length) {
-        return res.status(404).json({ message: 'Um ou mais membros atribuídos são inválidos ou não pertencem a você.' });
+        return res
+          .status(404)
+          .json({
+            message:
+              "Um ou mais membros atribuídos são inválidos ou não pertencem a você.",
+          });
       }
     }
 
-    const newTask = new Task({ title, description, status, priority, userId, assignedMemberIds, dueDate });
+    const newTask = new Task({
+      title,
+      description,
+      status,
+      priority,
+      userId,
+      assignedMemberIds,
+      dueDate,
+    });
     const task = await newTask.save();
-    
-    // Popula a resposta com os dados dos membros para que o frontend possa exibi-los.
-    const populatedTask = await Task.findById(task._id).populate('assignedMemberIds', 'name email');
-    res.status(201).json({ task: populatedTask, message: 'Tarefa criada com sucesso!' });
 
+    // Popula a resposta com os dados dos membros para que o frontend possa exibi-los.
+    const populatedTask = await Task.findById(task._id).populate(
+      "assignedMemberIds",
+      "name email"
+    );
+    res
+      .status(201)
+      .json({ task: populatedTask, message: "Tarefa criada com sucesso!" });
   } catch (error) {
-    console.error('Erro ao criar tarefa:', error.message);
-    if (error.name === 'ValidationError') {
-        const messages = Object.values(error.errors).map(val => val.message);
-        return res.status(400).json({ message: messages.join(' ') });
+    console.error("Erro ao criar tarefa:", error.message);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({ message: messages.join(" ") });
     }
-    res.status(500).json({ message: 'Erro interno do servidor ao criar tarefa.' });
+    res
+      .status(500)
+      .json({ message: "Erro interno do servidor ao criar tarefa." });
   }
 };
 
@@ -48,17 +76,18 @@ exports.getUserTasks = async (req, res) => {
   const userId = req.user.id;
   try {
     const tasks = await Task.find({ userId })
-      .populate('assignedMemberIds', 'name email role')
+      .populate("assignedMemberIds", "name email role")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
       tasks,
-      totalTasks: tasks.length
+      totalTasks: tasks.length,
     });
-
   } catch (error) {
-    console.error('Erro ao buscar tarefas do usuário:', error.message);
-    res.status(500).json({ message: 'Erro interno do servidor ao buscar tarefas.' });
+    console.error("Erro ao buscar tarefas do usuário:", error.message);
+    res
+      .status(500)
+      .json({ message: "Erro interno do servidor ao buscar tarefas." });
   }
 };
 
@@ -71,17 +100,19 @@ exports.getTaskById = async (req, res) => {
   const taskId = req.params.id;
   try {
     if (!mongoose.Types.ObjectId.isValid(taskId)) {
-      return res.status(400).json({ message: 'ID da tarefa inválido.' });
+      return res.status(400).json({ message: "ID da tarefa inválido." });
     }
-    const task = await Task.findOne({ _id: taskId, userId: req.user.id })
-                           .populate('assignedMemberIds', 'name email role');
+    const task = await Task.findOne({
+      _id: taskId,
+      userId: req.user.id,
+    }).populate("assignedMemberIds", "name email role");
     if (!task) {
-      return res.status(404).json({ message: 'Tarefa não encontrada.' });
+      return res.status(404).json({ message: "Tarefa não encontrada." });
     }
     res.status(200).json(task);
   } catch (error) {
-    console.error('Erro ao buscar tarefa por ID:', error.message);
-    res.status(500).json({ message: 'Erro interno do servidor.' });
+    console.error("Erro ao buscar tarefa por ID:", error.message);
+    res.status(500).json({ message: "Erro interno do servidor." });
   }
 };
 
@@ -93,40 +124,60 @@ exports.getTaskById = async (req, res) => {
 exports.updateTask = async (req, res) => {
   const taskId = req.params.id;
   const userId = req.user.id;
-  const { title, description, status, priority, assignedMemberIds, dueDate } = req.body;
+  const { title, description, status, priority, assignedMemberIds, dueDate } =
+    req.body;
   try {
     if (!mongoose.Types.ObjectId.isValid(taskId)) {
-      return res.status(400).json({ message: 'ID da tarefa inválido.' });
+      return res.status(400).json({ message: "ID da tarefa inválido." });
     }
     const fieldsToUpdate = {};
     if (title !== undefined) fieldsToUpdate.title = title;
     if (description !== undefined) fieldsToUpdate.description = description;
     if (status !== undefined) fieldsToUpdate.status = status;
     if (priority !== undefined) fieldsToUpdate.priority = priority;
-    if (dueDate !== undefined) fieldsToUpdate.dueDate = dueDate === '' ? null : dueDate;
+    if (dueDate !== undefined)
+      fieldsToUpdate.dueDate = dueDate === "" ? null : dueDate;
 
     if (assignedMemberIds !== undefined) {
       if (Array.isArray(assignedMemberIds) && assignedMemberIds.length > 0) {
-        const members = await Member.find({ '_id': { $in: assignedMemberIds }, createdByUserId: userId });
+        const members = await Member.find({
+          _id: { $in: assignedMemberIds },
+          createdByUserId: userId,
+        });
         if (members.length !== assignedMemberIds.length) {
-          return res.status(400).json({ message: 'Um ou mais membros atribuídos são inválidos.' });
+          return res
+            .status(400)
+            .json({ message: "Um ou mais membros atribuídos são inválidos." });
         }
       }
-      fieldsToUpdate.assignedMemberIds = Array.isArray(assignedMemberIds) ? assignedMemberIds : [];
+      fieldsToUpdate.assignedMemberIds = Array.isArray(assignedMemberIds)
+        ? assignedMemberIds
+        : [];
     }
-    const updatedTask = await Task.findByIdAndUpdate(taskId, { $set: fieldsToUpdate }, { new: true, runValidators: true })
-                                  .populate('assignedMemberIds', 'name email role');
+    const updatedTask = await Task.findByIdAndUpdate(
+      taskId,
+      { $set: fieldsToUpdate },
+      { new: true, runValidators: true }
+    ).populate("assignedMemberIds", "name email role");
     if (!updatedTask || updatedTask.userId.toString() !== userId) {
-        return res.status(404).json({ message: 'Tarefa não encontrada ou não pertence a este usuário.' });
+      return res
+        .status(404)
+        .json({
+          message: "Tarefa não encontrada ou não pertence a este usuário.",
+        });
     }
-    res.status(200).json({ task: updatedTask, message: 'Tarefa atualizada com sucesso!' });
+    res
+      .status(200)
+      .json({ task: updatedTask, message: "Tarefa atualizada com sucesso!" });
   } catch (error) {
-    console.error('Erro ao atualizar tarefa:', error.message);
-    if (error.name === 'ValidationError') {
-        const messages = Object.values(error.errors).map(val => val.message);
-        return res.status(400).json({ message: messages.join(' ') });
+    console.error("Erro ao atualizar tarefa:", error.message);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({ message: messages.join(" ") });
     }
-    res.status(500).json({ message: 'Erro interno do servidor ao atualizar tarefa.' });
+    res
+      .status(500)
+      .json({ message: "Erro interno do servidor ao atualizar tarefa." });
   }
 };
 
@@ -139,16 +190,24 @@ exports.deleteTask = async (req, res) => {
   try {
     const taskId = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(taskId)) {
-        return res.status(400).json({ message: 'ID da tarefa inválido.' });
+      return res.status(400).json({ message: "ID da tarefa inválido." });
     }
-    const task = await Task.findOneAndDelete({ _id: taskId, userId: req.user.id });
+    const task = await Task.findOneAndDelete({
+      _id: taskId,
+      userId: req.user.id,
+    });
     if (!task) {
-      return res.status(404).json({ message: 'Tarefa não encontrada ou não pertence a este usuário.' });
+      return res
+        .status(404)
+        .json({
+          message: "Tarefa não encontrada ou não pertence a este usuário.",
+        });
     }
-    res.status(200).json({ message: 'Tarefa deletada com sucesso.' });
+    res.status(200).json({ message: "Tarefa deletada com sucesso." });
   } catch (error) {
-    console.error('Erro ao deletar tarefa:', error.message);
-    res.status(500).json({ message: 'Erro interno do servidor ao deletar tarefa.' });
+    console.error("Erro ao deletar tarefa:", error.message);
+    res
+      .status(500)
+      .json({ message: "Erro interno do servidor ao deletar tarefa." });
   }
 };
-
