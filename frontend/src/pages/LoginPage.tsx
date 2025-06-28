@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { FormEvent } from 'react'; // <--- CORRIGIDO
+import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
@@ -69,7 +69,8 @@ const LoginPage: React.FC = () => {
       <article>
         <hgroup>
           <h1>Login</h1>
-          <h2>Aceda à sua conta para gerir as suas tarefas.</h2>
+	  <hr />
+          <h2>Conecte-se à sua conta para gerenciar as suas tarefas.</h2>
         </hgroup>
         <form onSubmit={handleSubmit}>
           <label htmlFor="email">
@@ -112,7 +113,7 @@ const LoginPage: React.FC = () => {
         </form>
         <footer style={{ marginTop: '1rem', textAlign: 'center' }}>
           <p>
-            Não tem uma conta? <Link to="/register">Crie uma aqui</Link>.
+            Não tem uma conta? <Link to="/register">Crie uma aqui</Link>!
           </p>
         </footer>
       </article>

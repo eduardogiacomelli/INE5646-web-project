@@ -6,7 +6,7 @@ const {
   getTaskById,
   updateTask,
   deleteTask,
-  getTasksByStatus // Adicionado para a funcionalidade de monitoramento
+  
 } = require('../controllers/taskController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -22,10 +22,6 @@ router.post('/', protect, createTask);
 // @access  Private
 router.get('/', protect, getUserTasks);
 
-// @route   GET /api/tasks/status/:statusValue
-// @desc    Obter tarefas do usuário por um status específico
-// @access  Private
-router.get('/status/:statusValue', protect, getTasksByStatus);
 
 // @route   GET /api/tasks/:id
 // @desc    Obter uma tarefa específica pelo ID

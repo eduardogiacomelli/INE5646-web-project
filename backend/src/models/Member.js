@@ -20,7 +20,7 @@ const MemberSchema = new mongoose.Schema({
     trim: true,
     maxlength: [50, 'O cargo não pode exceder 50 caracteres.']
   },
-  // Outros campos relevantes para um membro da equipe, como telefone, etc.
+  
   createdByUserId: { // Usuário que adicionou este membro à sua "equipe"
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

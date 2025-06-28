@@ -5,7 +5,7 @@ import axios, { AxiosError } from 'axios';
 
 // A URL base da sua API backend.
 const API_BASE_URL = import.meta.env.MODE === 'production' 
-  ? '/react-todo/api' // <--- ALTERADO AQUI para incluir /react-todo/
+  ? '/api'
   : 'http://150.162.244.21:3001/api'; // Use o IP do seu VPS aqui durante o desenvolvimento no VPS
 
 const api = axios.create({

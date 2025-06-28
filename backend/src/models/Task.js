@@ -33,15 +33,14 @@ const TaskSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  assignedToMemberId: { // Membro da equipe ao qual a tarefa está atribuída (opcional)
+  
+  assignedMemberIds: [{ 
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Member',
-    default: null
-  },
+    ref: 'Member' 
+  }],
   dueDate: { // Data de vencimento da tarefa
     type: Date
   },
-  // Você pode adicionar outros campos como 'tags', 'attachments', etc.
 }, {
   timestamps: true // Adiciona createdAt e updatedAt automaticamente
 });
@@ -53,3 +52,4 @@ TaskSchema.index({ userId: 1, dueDate: 1 });
 
 
 module.exports = mongoose.model('Task', TaskSchema);
+

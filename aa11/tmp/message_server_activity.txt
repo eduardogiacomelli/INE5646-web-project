@@ -1,0 +1,115 @@
+[2025-05-24 00:44:36.625] (aa11-Server) SERVER: Starting up. PID: 11763
+[2025-05-24 00:44:36.626] (aa11-Server) SERVER: Base Project Path: /var/www/html/aa/aa11
+[2025-05-24 00:44:36.626] (aa11-Server) SERVER: Temp Dir: /var/www/html/aa/aa11/tmp
+[2025-05-24 00:44:36.626] (aa11-Server) LOCK: File /var/www/html/aa/aa11/tmp/message_server.lock created with PID 11763.
+[2025-05-24 00:44:36.626] (aa11-Server) PID: 11763 written to /var/www/html/aa/aa11/tmp/message_server.pid
+[2025-05-24 00:44:36.627] (aa11-Server) WS: Server instance created for ws://0.0.0.0:8082
+[2025-05-24 00:44:36.628] (aa11-Server) TCP: Listener starting on 0.0.0.0:8080
+[2025-05-24 00:44:36.628] (aa11-Server) UDP: Listener starting on 0.0.0.0:8081
+[2025-05-24 00:44:36.628] (aa11-Server) SERVER: TCP and UDP listener threads started.
+[2025-05-24 00:44:36.629] (aa11-Server) WS: Entering serve_forever loop...
+[2025-05-24 00:45:13.095] (aa11-Server) TCP: Accepted connection from 150.162.244.21:57564
+[2025-05-24 00:45:13.097] (aa11-Server) TCP: Handling connection from 150.162.244.21:57564
+[2025-05-24 00:45:15.689] (aa11-Server) TCP: Received from 150.162.244.21:57564 - 'oi'
+[2025-05-24 00:45:15.689] (aa11-Server) WS_Broadcast: No WebSocket clients to send to. Message: {"type": "tcp", "ip": "150.162.244.21", "port": 57564, "timestamp": "2025-05-24T00:45:15.689777+00:0
+[2025-05-24 00:45:15.690] (aa11-Server) TCP: Connection closed by 150.162.244.21:57564
+[2025-05-24 00:45:15.691] (aa11-Server) TCP: Handler for 150.162.244.21:57564 finished.
+[2025-05-24 00:45:15.691] (aa11-Server) TCP: Accepted connection from 150.162.244.21:57576
+[2025-05-24 00:45:15.692] (aa11-Server) TCP: Handling connection from 150.162.244.21:57576
+[2025-05-24 00:45:20.559] (aa11-Server) TCP: Received from 150.162.244.21:57576 - 'exit'
+[2025-05-24 00:45:20.559] (aa11-Server) WS_Broadcast: No WebSocket clients to send to. Message: {"type": "tcp", "ip": "150.162.244.21", "port": 57576, "timestamp": "2025-05-24T00:45:20.559708+00:0
+[2025-05-24 00:45:20.560] (aa11-Server) TCP: Handler for 150.162.244.21:57576 finished.
+[2025-05-24 00:45:26.027] (aa11-Server) UDP: Received from 150.162.244.21:44414 - 'oi'
+[2025-05-24 00:45:26.027] (aa11-Server) WS_Broadcast: No WebSocket clients to send to. Message: {"type": "udp", "ip": "150.162.244.21", "port": 44414, "timestamp": "2025-05-24T00:45:26.027842+00:0
+[2025-05-24 00:46:37.426] (aa11-Server) UDP: Received from 150.162.244.21:44414 - 'exit'
+[2025-05-24 00:46:37.426] (aa11-Server) WS_Broadcast: No WebSocket clients to send to. Message: {"type": "udp", "ip": "150.162.244.21", "port": 44414, "timestamp": "2025-05-24T00:46:37.426574+00:0
+[2025-06-04 00:30:06.755] (aa11-Server) SERVER: Starting up. PID: 22744
+[2025-06-04 00:30:06.755] (aa11-Server) SERVER: Base Project Path: /var/www/html/aa/aa11
+[2025-06-04 00:30:06.756] (aa11-Server) SERVER: Temp Dir: /var/www/html/aa/aa11/tmp
+[2025-06-04 00:30:06.756] (aa11-Server) LOCK: File /var/www/html/aa/aa11/tmp/message_server.lock created with PID 22744.
+[2025-06-04 00:30:06.756] (aa11-Server) PID: 22744 written to /var/www/html/aa/aa11/tmp/message_server.pid
+[2025-06-04 00:30:06.758] (aa11-Server) WS: Server instance created for ws://0.0.0.0:8082
+[2025-06-04 00:30:06.758] (aa11-Server) TCP: Listener starting on 0.0.0.0:8080
+[2025-06-04 00:30:06.759] (aa11-Server) SERVER: TCP and UDP listener threads started.
+[2025-06-04 00:30:06.759] (aa11-Server) WS: Entering serve_forever loop...
+[2025-06-04 00:30:06.759] (aa11-Server) UDP: Listener starting on 0.0.0.0:8081
+[2025-06-04 00:32:45.369] (aa11-Server) SIGNAL: Received SIGTERM. Initiating shutdown...
+[2025-06-04 00:32:45.370] (aa11-Server) SIGNAL: Closing WebSocket server instance...
+[2025-06-04 00:32:45.370] (aa11-Server) SERVER: Main loop critical error: [Errno 9] Bad file descriptor
+[2025-06-04 00:32:45.370] (aa11-Server) SERVER: Entering finally block for cleanup.
+[2025-06-04 00:32:45.370] (aa11-Server) SERVER: Waiting for TCP thread to finish...
+[2025-06-04 00:32:45.935] (aa11-Server) TCP: Listener thread loop finished.
+[2025-06-04 00:32:45.935] (aa11-Server) TCP: Listener socket closed.
+[2025-06-04 00:32:45.936] (aa11-Server) SERVER: Waiting for UDP thread to finish...
+[2025-06-04 00:32:45.937] (aa11-Server) UDP: Listener thread loop finished.
+[2025-06-04 00:32:45.937] (aa11-Server) UDP: Listener socket closed.
+[2025-06-04 00:32:45.938] (aa11-Server) PID: File /var/www/html/aa/aa11/tmp/message_server.pid removed.
+[2025-06-04 00:32:45.939] (aa11-Server) LOCK: File /var/www/html/aa/aa11/tmp/message_server.lock removed by current PID 22744.
+[2025-06-04 00:32:45.939] (aa11-Server) SERVER: Shutdown complete.
+[2025-06-04 00:32:49.473] (aa11-Server) SERVER: Starting up. PID: 22757
+[2025-06-04 00:32:49.474] (aa11-Server) SERVER: Base Project Path: /var/www/html/aa/aa11
+[2025-06-04 00:32:49.474] (aa11-Server) SERVER: Temp Dir: /var/www/html/aa/aa11/tmp
+[2025-06-04 00:32:49.474] (aa11-Server) LOCK: File /var/www/html/aa/aa11/tmp/message_server.lock created with PID 22757.
+[2025-06-04 00:32:49.474] (aa11-Server) PID: 22757 written to /var/www/html/aa/aa11/tmp/message_server.pid
+[2025-06-04 00:32:49.475] (aa11-Server) WS: Server instance created for ws://0.0.0.0:8082
+[2025-06-04 00:32:49.476] (aa11-Server) TCP: Listener starting on 0.0.0.0:8080
+[2025-06-04 00:32:49.477] (aa11-Server) SERVER: TCP and UDP listener threads started.
+[2025-06-04 00:32:49.477] (aa11-Server) UDP: Listener starting on 0.0.0.0:8081
+[2025-06-04 00:32:49.477] (aa11-Server) WS: Entering serve_forever loop...
+[2025-06-04 00:36:24.724] (aa11-Server) SERVER: Starting up. PID: 22836
+[2025-06-04 00:36:24.724] (aa11-Server) SERVER: Base Project Path: /var/www/html/aa/aa11
+[2025-06-04 00:36:24.724] (aa11-Server) SERVER: Temp Dir: /var/www/html/aa/aa11/tmp
+[2025-06-04 00:36:24.724] (aa11-Server) LOCK: File /var/www/html/aa/aa11/tmp/message_server.lock created with PID 22836.
+[2025-06-04 00:36:24.725] (aa11-Server) PID: 22836 written to /var/www/html/aa/aa11/tmp/message_server.pid
+[2025-06-04 00:36:24.726] (aa11-Server) WS: Server instance created for ws://0.0.0.0:8082
+[2025-06-04 00:36:24.727] (aa11-Server) TCP: Listener starting on 0.0.0.0:8080
+[2025-06-04 00:36:24.727] (aa11-Server) SERVER: TCP and UDP listener threads started.
+[2025-06-04 00:36:24.727] (aa11-Server) UDP: Listener starting on 0.0.0.0:8081
+[2025-06-04 00:36:24.727] (aa11-Server) WS: Entering serve_forever loop...
+[2025-06-04 00:36:58.341] (aa11-Server) SIGNAL: Received SIGTERM. Initiating shutdown...
+[2025-06-04 00:36:58.341] (aa11-Server) SIGNAL: Closing WebSocket server instance...
+[2025-06-04 00:36:58.342] (aa11-Server) SERVER: Main loop critical error: [Errno 9] Bad file descriptor
+[2025-06-04 00:36:58.342] (aa11-Server) SERVER: Entering finally block for cleanup.
+[2025-06-04 00:36:58.342] (aa11-Server) SERVER: Waiting for TCP thread to finish...
+[2025-06-04 00:36:58.759] (aa11-Server) TCP: Listener thread loop finished.
+[2025-06-04 00:36:58.760] (aa11-Server) TCP: Listener socket closed.
+[2025-06-04 00:36:58.760] (aa11-Server) SERVER: Waiting for UDP thread to finish...
+[2025-06-04 00:36:58.765] (aa11-Server) UDP: Listener thread loop finished.
+[2025-06-04 00:36:58.765] (aa11-Server) UDP: Listener socket closed.
+[2025-06-04 00:36:58.765] (aa11-Server) PID: File /var/www/html/aa/aa11/tmp/message_server.pid removed.
+[2025-06-04 00:36:58.766] (aa11-Server) LOCK: File /var/www/html/aa/aa11/tmp/message_server.lock removed by current PID 22836.
+[2025-06-04 00:36:58.766] (aa11-Server) SERVER: Shutdown complete.
+[2025-06-05 15:41:33.735] (aa11-Server) SERVER: Starting up. PID: 26956
+[2025-06-05 15:41:33.735] (aa11-Server) SERVER: Base Project Path: /var/www/html/aa/aa11
+[2025-06-05 15:41:33.735] (aa11-Server) SERVER: Temp Dir: /var/www/html/aa/aa11/tmp
+[2025-06-05 15:41:33.735] (aa11-Server) LOCK: File /var/www/html/aa/aa11/tmp/message_server.lock created with PID 26956.
+[2025-06-05 15:41:33.736] (aa11-Server) PID: 26956 written to /var/www/html/aa/aa11/tmp/message_server.pid
+[2025-06-05 15:41:33.738] (aa11-Server) WS: Server instance created for ws://0.0.0.0:8082
+[2025-06-05 15:41:33.738] (aa11-Server) TCP: Listener starting on 0.0.0.0:8080
+[2025-06-05 15:41:33.739] (aa11-Server) SERVER: TCP and UDP listener threads started.
+[2025-06-05 15:41:33.739] (aa11-Server) WS: Entering serve_forever loop...
+[2025-06-05 15:41:33.739] (aa11-Server) UDP: Listener starting on 0.0.0.0:8081
+[2025-06-05 15:41:33.740] (aa11-Server) TCP: Bind/listen error: [Errno 98] Address already in use
+[2025-06-06 16:04:33.947] (aa11-Server) SERVER: Starting up. PID: 40139
+[2025-06-06 16:04:33.948] (aa11-Server) SERVER: Base Project Path: /var/www/html/aa/aa11
+[2025-06-06 16:04:33.948] (aa11-Server) SERVER: Temp Dir: /var/www/html/aa/aa11/tmp
+[2025-06-06 16:04:33.948] (aa11-Server) LOCK: File /var/www/html/aa/aa11/tmp/message_server.lock created with PID 40139.
+[2025-06-06 16:04:33.948] (aa11-Server) PID: 40139 written to /var/www/html/aa/aa11/tmp/message_server.pid
+[2025-06-06 16:04:33.950] (aa11-Server) WS: Server instance created for ws://0.0.0.0:8082
+[2025-06-06 16:04:33.950] (aa11-Server) TCP: Listener starting on 0.0.0.0:8080
+[2025-06-06 16:04:33.951] (aa11-Server) SERVER: TCP and UDP listener threads started.
+[2025-06-06 16:04:33.952] (aa11-Server) WS: Entering serve_forever loop...
+[2025-06-06 16:04:33.951] (aa11-Server) UDP: Listener starting on 0.0.0.0:8081
+[2025-06-06 16:04:41.820] (aa11-Server) SIGNAL: Received SIGTERM. Initiating shutdown...
+[2025-06-06 16:04:41.821] (aa11-Server) SIGNAL: Closing WebSocket server instance...
+[2025-06-06 16:04:41.821] (aa11-Server) SERVER: Main loop critical error: [Errno 9] Bad file descriptor
+[2025-06-06 16:04:41.822] (aa11-Server) SERVER: Entering finally block for cleanup.
+[2025-06-06 16:04:41.822] (aa11-Server) SERVER: Waiting for TCP thread to finish...
+[2025-06-06 16:04:41.961] (aa11-Server) TCP: Listener thread loop finished.
+[2025-06-06 16:04:41.961] (aa11-Server) TCP: Listener socket closed.
+[2025-06-06 16:04:41.962] (aa11-Server) UDP: Listener thread loop finished.
+[2025-06-06 16:04:41.962] (aa11-Server) SERVER: Waiting for UDP thread to finish...
+[2025-06-06 16:04:41.963] (aa11-Server) UDP: Listener socket closed.
+[2025-06-06 16:04:41.964] (aa11-Server) PID: File /var/www/html/aa/aa11/tmp/message_server.pid removed.
+[2025-06-06 16:04:41.965] (aa11-Server) LOCK: File /var/www/html/aa/aa11/tmp/message_server.lock removed by current PID 40139.
+[2025-06-06 16:04:41.965] (aa11-Server) SERVER: Shutdown complete.

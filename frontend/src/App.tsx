@@ -106,7 +106,7 @@ function App() {
       <footer style={{ textAlign: 'center', padding: '2rem 1rem', marginTop: 'auto', borderTop: '1px solid var(--pico-muted-border-color, #e5e7eb)' }}>
         <div className="container">
           <p>
-            © {new Date().getFullYear()} INE5646 - Gestor de Tarefas Pro. Todos os direitos reservados.
+            © {new Date().getFullYear()} INE5646 - Gerenciador de Tarefas. Todos os direitos reservados.
           </p>
           <p>
             Desenvolvido por Eduardo Wallner Giacomelli & Matias Adrian Fuks.

@@ -23,7 +23,7 @@ const errorHandler = (err, req, res, next) => {
 
   // Tratamento específico para erros do Mongoose (como ObjectId inválido)
   if (err.name === 'CastError' && err.kind === 'ObjectId') {
-    statusCode = 404; // Ou 400, dependendo de como você quer tratar
+    statusCode = 404;
     message = 'Recurso não encontrado (ID mal formatado).';
   }
 

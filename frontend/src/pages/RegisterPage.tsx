@@ -86,16 +86,17 @@ const RegisterPage: React.FC = () => {
       <article>
         <hgroup>
           <h1>Criar Conta</h1>
-          <h2>Junte-se à nossa plataforma e organize as suas tarefas.</h2>
+	  <hr />
+          <h2>Cadastre-se para começar a gerenciar as suas tarefas.</h2>
         </hgroup>
         <form onSubmit={handleSubmit}>
           <label htmlFor="username">
-            Nome de Utilizador
+            Nome de Usuário
             <input
               type="text"
               id="username"
               name="username"
-              placeholder="Seu nome de utilizador"
+              placeholder="Seu nome de usuário"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required

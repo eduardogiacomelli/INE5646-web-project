@@ -1,23 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { FormEvent } from 'react'; // <--- CORRIGIDO
-import { Link } from 'react-router-dom';
+import type { FormEvent } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
+import MemberCard from '../components/members/MemberCard'; // Importando nosso novo componente
 
-interface Member {
+// --- INTERFACES ---
+// Exportando para que o MemberCard possa usar
+export interface MemberWithTaskCount {
   _id: string;
   name: string;
   email?: string;
   role?: string;
-  createdByUserId: string;
-  createdAt: string;
-  updatedAt: string;
+  completedTasks: number; // Adicionando o campo para o contador
 }
 
 interface MembersApiResponse {
-  members: Member[];
-  currentPage: number;
-  totalPages: number;
+  members: MemberWithTaskCount[];
   totalMembers: number;
 }
 
@@ -27,30 +25,22 @@ interface MemberFormData {
   role: string;
 }
 
-const initialMemberFormData: MemberFormData = {
-  name: '',
-  email: '',
-  role: '',
-};
+const initialMemberFormData: MemberFormData = { name: '', email: '', role: '' };
 
 const UserMembersPage: React.FC = () => {
   const { user } = useAuth();
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<MemberWithTaskCount[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-
   const [isFormModalOpen, setIsFormModalOpen] = useState<boolean>(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [currentMemberData, setCurrentMemberData] = useState<MemberFormData>(initialMemberFormData);
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
-
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
-
   const [isSubmittingForm, setIsSubmittingForm] = useState<boolean>(false);
-
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [memberToDelete, setMemberToDelete] = useState<MemberWithTaskCount | null>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const formDialogRef = useRef<HTMLDialogElement>(null);
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
 
@@ -61,8 +51,7 @@ const UserMembersPage: React.FC = () => {
       const response = await api.get<MembersApiResponse>('/members');
       setMembers(response.data.members);
     } catch (err: any) {
-      console.error('Erro ao buscar membros:', err);
-      setError(err.response?.data?.message || 'Não foi possível carregar os membros da equipa.');
+      setError(err.response?.data?.message || 'Não foi possível carregar os membros.');
     } finally {
       setIsLoading(false);
     }
@@ -77,8 +66,7 @@ const UserMembersPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-
-  const openFormModal = (mode: 'create' | 'edit', member?: Member) => {
+  const handleOpenFormModal = (mode: 'create' | 'edit', member?: MemberWithTaskCount) => {
     setModalMode(mode);
     setFormError(null);
     if (mode === 'edit' && member) {
@@ -96,15 +84,13 @@ const UserMembersPage: React.FC = () => {
     formDialogRef.current?.showModal();
   };
 
-  const closeFormModal = () => {
+  const handleCloseFormModal = () => {
     setIsFormModalOpen(false);
     formDialogRef.current?.close();
-    setEditingMemberId(null);
   };
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setCurrentMemberData(prev => ({ ...prev, [name]: value }));
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentMemberData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -123,180 +109,137 @@ const UserMembersPage: React.FC = () => {
         return;
     }
 
-    const payload: MemberFormData = {
+    const payload = {
         name: currentMemberData.name.trim(),
-        email: currentMemberData.email.trim() || '',
-        role: currentMemberData.role.trim() || '',
+        email: currentMemberData.email.trim(),
+        role: currentMemberData.role.trim(),
     };
-    
+
     try {
       if (modalMode === 'create') {
-        await api.post<{ member: Member; message: string }>('/members', payload);
+        await api.post('/members', payload);
       } else if (modalMode === 'edit' && editingMemberId) {
-        await api.put<{ member: Member; message: string }>(`/members/${editingMemberId}`, payload);
+        await api.put(`/members/${editingMemberId}`, payload);
       }
-      fetchMembers(); 
-      closeFormModal();
+      fetchMembers();
+      handleCloseFormModal();
     } catch (err: any) {
-      console.error(`Erro ao ${modalMode === 'create' ? 'criar' : 'editar'} membro:`, err);
-      setFormError(err.response?.data?.message || `Não foi possível ${modalMode === 'create' ? 'criar' : 'editar'} o membro.`);
+      setFormError(err.response?.data?.message || `Não foi possível ${modalMode} o membro.`);
     } finally {
       setIsSubmittingForm(false);
     }
   };
 
-  const openDeleteModal = (member: Member) => {
+  const handleOpenDeleteModal = (member: MemberWithTaskCount) => {
     setMemberToDelete(member);
     setIsDeleteModalOpen(true);
     deleteDialogRef.current?.showModal();
   };
 
-  const closeDeleteModal = () => {
+  const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false);
     deleteDialogRef.current?.close();
-    setMemberToDelete(null);
   };
 
-  const confirmDeleteMember = async () => {
+  const handleConfirmDeleteMember = async () => {
     if (!memberToDelete) return;
     setIsDeleting(true);
     setError(null);
     try {
       await api.delete(`/members/${memberToDelete._id}`);
-      setMembers(prevMembers => prevMembers.filter(m => m._id !== memberToDelete._id));
-      closeDeleteModal();
+      setMembers(prev => prev.filter(m => m._id !== memberToDelete._id));
+      handleCloseDeleteModal();
     } catch (err: any) {
-      console.error('Erro ao excluir membro:', err);
       setError(err.response?.data?.message || 'Não foi possível excluir o membro.');
-      closeDeleteModal();
+      handleCloseDeleteModal();
     } finally {
       setIsDeleting(false);
     }
   };
 
-  if (isLoading && members.length === 0) {
-    return <article aria-busy="true">A carregar membros da equipa...</article>;
-  }
-
-  if (error && members.length === 0) {
-    return (
-      <article>
-        <hgroup>
-          <h2>Erro ao Carregar Membros</h2>
-          <p style={{ color: 'var(--pico-form-element-invalid-active-border-color, red)' }}>{error}</p>
-        </hgroup>
-        <Link to="/dashboard" role="button" className="secondary">Voltar ao Dashboard</Link>
-      </article>
-    );
+  if (isLoading) {
+    return <article aria-busy="true">Carregando equipe...</article>;
   }
 
   return (
     <article>
       <hgroup>
-        <h1>Meus Membros da Equipa</h1>
-        <h2>Adicione e gira os membros da sua equipa.</h2>
+        <h1>Minha Equipe</h1>
+        <p>Adicione e gerencie os membros que podem ser atribuídos a tarefas.</p>
       </hgroup>
 
-      {error && members.length > 0 && (
-         <aside style={{ backgroundColor: 'var(--pico-error-background)', color: 'var(--pico-error-color)', padding: '1rem', marginBottom: '1rem', border: '1px solid var(--pico-error-border)', borderRadius: 'var(--pico-border-radius)'}}>
-            <strong>Erro:</strong> {error}
+      {error && (
+        <aside style={{ backgroundColor: 'var(--pico-color-red-200)', padding: '1rem', marginBottom: '1rem', border: '1px solid var(--pico-color-red-500)', borderRadius: 'var(--pico-border-radius)'}}>
+          <strong>Erro:</strong> {error}
         </aside>
       )}
 
-      <p>
-        <button onClick={() => openFormModal('create')} disabled={isFormModalOpen || isDeleteModalOpen}>
-          + Adicionar Novo Membro
-        </button>
-      </p>
+      <button onClick={() => handleOpenFormModal('create')} disabled={isFormModalOpen || isDeleteModalOpen}>
+        + Adicionar Novo Membro
+      </button>
 
-      <dialog ref={formDialogRef} onClose={closeFormModal}>
+      {/* Modal de Criar/Editar Membro */}
+      <dialog ref={formDialogRef} onClose={handleCloseFormModal}>
         <article>
           <header>
-            <a href="#close" aria-label="Fechar" className="close" onClick={(e) => { e.preventDefault(); closeFormModal(); }}></a>
+            <a href="#close" aria-label="Fechar" className="close" onClick={handleCloseFormModal}></a>
             <h3>{modalMode === 'create' ? 'Adicionar Novo Membro' : 'Editar Membro'}</h3>
           </header>
           <form onSubmit={handleFormSubmit}>
-            <label htmlFor="memberName">
-              Nome do Membro*
-              <input type="text" id="memberName" name="name" value={currentMemberData.name} onChange={handleFormChange} required placeholder="Nome completo do membro"/>
-            </label>
-            <label htmlFor="memberEmail">
-              Email (Opcional)
-              <input type="email" id="memberEmail" name="email" value={currentMemberData.email} onChange={handleFormChange} placeholder="email@exemplo.com"/>
-            </label>
-            <label htmlFor="memberRole">
-              Cargo/Função (Opcional)
-              <input type="text" id="memberRole" name="role" value={currentMemberData.role} onChange={handleFormChange} placeholder="Ex: Desenvolvedor, Designer"/>
-            </label>
-            {formError && (<p style={{ color: 'var(--pico-form-element-invalid-active-border-color, red)' }}>{formError}</p>)}
+            <label htmlFor="memberName">Nome do Membro*</label>
+            <input type="text" id="memberName" name="name" value={currentMemberData.name} onChange={handleFormChange} required />
+            <label htmlFor="memberEmail">Email</label>
+            <input type="email" id="memberEmail" name="email" value={currentMemberData.email} onChange={handleFormChange} />
+            <label htmlFor="memberRole">Cargo/Função</label>
+            <input type="text" id="memberRole" name="role" value={currentMemberData.role} onChange={handleFormChange} />
+            {formError && <p style={{ color: 'var(--pico-color-red-500)' }}>{formError}</p>}
             <footer>
-              <button type="button" className="secondary outline" onClick={closeFormModal} disabled={isSubmittingForm}>Cancelar</button>
+              <button type="button" className="secondary outline" onClick={handleCloseFormModal} disabled={isSubmittingForm}>Cancelar</button>
               <button type="submit" aria-busy={isSubmittingForm} disabled={isSubmittingForm}>
-                {isSubmittingForm ? (modalMode === 'create' ? 'A adicionar...' : 'A guardar...') : (modalMode === 'create' ? 'Adicionar Membro' : 'Guardar Alterações')}
+                {isSubmittingForm ? 'Salvando...' : 'Salvar'}
               </button>
             </footer>
           </form>
         </article>
       </dialog>
 
-      <dialog ref={deleteDialogRef} onClose={closeDeleteModal}>
+      {/* Modal de Exclusão */}
+      <dialog ref={deleteDialogRef} onClose={handleCloseDeleteModal}>
         <article>
-          <header>
-            <a href="#close" aria-label="Fechar" className="close" onClick={(e) => { e.preventDefault(); closeDeleteModal(); }}></a>
-            <h3>Confirmar Exclusão</h3>
-          </header>
-          <p>
-            Tem a certeza de que deseja excluir o membro "<strong>{memberToDelete?.name}</strong>"?
-            As tarefas atribuídas a este membro serão desassociadas (não excluídas).
-            Esta ação não pode ser desfeita.
-          </p>
-          <footer>
-            <button type="button" className="secondary outline" onClick={closeDeleteModal} disabled={isDeleting}>
-              Cancelar
-            </button>
-            <button type="button" className="contrast" onClick={confirmDeleteMember} aria-busy={isDeleting} disabled={isDeleting}>
-              {isDeleting ? 'A excluir...' : 'Excluir Membro'}
-            </button>
-          </footer>
+            <header>
+                <a href="#close" aria-label="Fechar" className="close" onClick={handleCloseDeleteModal}></a>
+                <h3>Confirmar Exclusão</h3>
+            </header>
+            <p>
+                Tem certeza que deseja excluir o membro "<strong>{memberToDelete?.name}</strong>"?
+                As tarefas atribuídas a este membro serão desassociadas. Esta ação não pode ser desfeita.
+            </p>
+            <footer>
+                <button type="button" className="secondary outline" onClick={handleCloseDeleteModal} disabled={isDeleting}>Cancelar</button>
+                <button type="button" className="contrast" onClick={handleConfirmDeleteMember} aria-busy={isDeleting} disabled={isDeleting}>
+                {isDeleting ? 'Excluindo...' : 'Excluir Membro'}
+                </button>
+            </footer>
         </article>
       </dialog>
-
-      {members.length === 0 && !isLoading && (<p>Você ainda não adicionou nenhum membro à sua equipa.</p>)}
-      {members.length > 0 && (
-        <div className="overflow-auto">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Nome</th>
-                <th scope="col">Email</th>
-                <th scope="col">Cargo/Função</th>
-                <th scope="col">Adicionado em</th>
-                <th scope="col">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((member) => (
-                <tr key={member._id}>
-                  <td>{member.name}</td>
-                  <td>{member.email || 'N/A'}</td>
-                  <td>{member.role || 'N/A'}</td>
-                  <td>{new Date(member.createdAt).toLocaleDateString()}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className="outline secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}} onClick={() => openFormModal('edit', member)}>
-                        Editar
-                      </button>
-                      <button className="outline contrast" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}} onClick={() => openDeleteModal(member)}>
-                        Excluir
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      
+      {/* Layout de Cards para Membros */}
+      <section style={{ marginTop: '2rem' }}>
+        {members.length === 0 && !isLoading ? (
+          <p>Você ainda não adicionou membros à sua equipe.</p>
+        ) : (
+          <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem' }}>
+            {members.map((member) => (
+              <MemberCard
+                key={member._id}
+                member={member}
+                onEdit={() => handleOpenFormModal('edit', member)}
+                onDelete={() => handleOpenDeleteModal(member)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
     </article>
   );
 };

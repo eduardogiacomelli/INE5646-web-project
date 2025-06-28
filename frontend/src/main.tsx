@@ -7,8 +7,8 @@ import { AuthProvider } from './contexts/AuthContext'; // Importar o AuthProvide
 // Importar Pico.css
 import '@picocss/pico/css/pico.min.css';
 
-// Importar seus estilos globais personalizados
-import './styles/global.css';
+
+
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

@@ -1,6 +1,6 @@
-const Member = require('../models/Member');
-const Task = require('../models/Task'); // Para lidar com tarefas atribuídas ao deletar membro
-const mongoose = require('mongoose'); // Para checar ObjectId válido
+const Member = require("../models/Member");
+const Task = require("../models/Task");
+const mongoose = require("mongoose");
 
 /**
  * @desc    Criar um novo membro da equipe
@@ -9,78 +9,108 @@ const mongoose = require('mongoose'); // Para checar ObjectId válido
  */
 exports.createMember = async (req, res) => {
   const { name, email, role } = req.body;
-  const createdByUserId = req.user.id; // Obtido do middleware de autenticação
-
+  const createdByUserId = req.user.id;
   try {
-    // Opcional: Verificar se já existe um membro com este email para este usuário
-    if (email) {
-        const existingMemberByEmail = await Member.findOne({ email, createdByUserId });
-        if (existingMemberByEmail) {
-            return res.status(400).json({ message: 'Você já possui um membro com este email.' });
-        }
+    if (!name || name.trim().length < 3) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "O nome do membro é obrigatório e deve ter pelo menos 3 caracteres.",
+        });
     }
-
+    if (email && email.trim() !== "") {
+      const existingMemberByEmail = await Member.findOne({
+        email: email.trim(),
+        createdByUserId,
+      });
+      if (existingMemberByEmail) {
+        return res
+          .status(400)
+          .json({ message: "Você já possui um membro com este email." });
+      }
+    }
     const newMember = new Member({
-      name,
-      email,
-      role,
-      createdByUserId
+      name: name.trim(),
+      email: email ? email.trim() : "",
+      role: role ? role.trim() : "",
+      createdByUserId,
     });
-
     const member = await newMember.save();
-    res.status(201).json({ member, message: 'Membro criado com sucesso!' });
-
+    const memberWithTaskCount = { ...member.toObject(), completedTasks: 0 };
+    res
+      .status(201)
+      .json({
+        member: memberWithTaskCount,
+        message: "Membro criado com sucesso!",
+      });
   } catch (error) {
-    console.error('Erro ao criar membro:', error.message);
-    if (error.name === 'ValidationError') {
-        const messages = Object.values(error.errors).map(val => val.message);
-        return res.status(400).json({ message: messages.join(' ') });
+    console.error("Erro ao criar membro:", error.message);
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        message: Object.values(error.errors)
+          .map((val) => val.message)
+          .join(" "),
+      });
     }
-    res.status(500).json({ message: 'Erro interno do servidor ao criar membro.' });
+    res
+      .status(500)
+      .json({ message: "Erro interno do servidor ao criar membro." });
   }
 };
 
 /**
- * @desc    Obter todos os membros da equipe do usuário logado
+ * @desc    Obter todos os membros da equipe do usuário, com contagem de tarefas concluídas
  * @route   GET /api/members
  * @access  Private
  */
 exports.getUserMembers = async (req, res) => {
-  const createdByUserId = req.user.id;
-  const { page = 1, limit = 10, search, sortBy = 'name', sortOrder = 'asc' } = req.query;
-
   try {
-    const queryOptions = { createdByUserId };
-    if (search) {
-        queryOptions.$or = [ // Busca por nome ou email
-            { name: { $regex: search, $options: 'i' } },
-            { email: { $regex: search, $options: 'i' } }
-        ];
-    }
-
-    const sortParams = {};
-    if (sortBy) {
-        sortParams[sortBy] = sortOrder === 'desc' ? -1 : 1;
-    }
-
-
-    const members = await Member.find(queryOptions)
-        .sort(sortParams)
-        .skip((page - 1) * limit)
-        .limit(parseInt(limit));
-
-    const totalMembers = await Member.countDocuments(queryOptions);
-
-    res.status(200).json({
-        members,
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(totalMembers / limit),
-        totalMembers
-    });
-
+    const membersWithTaskCount = await Member.aggregate([
+      { $match: { createdByUserId: new mongoose.Types.ObjectId(req.user.id) } },
+      {
+        $lookup: {
+          from: "tasks",
+          localField: "_id",
+          foreignField: "assignedMemberIds",
+          as: "assignedTasks",
+        },
+      },
+      {
+        $addFields: {
+          completedTasks: {
+            $size: {
+              $filter: {
+                input: "$assignedTasks",
+                as: "task",
+                cond: { $eq: ["$$task.status", "concluida"] },
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          role: 1,
+          createdAt: 1,
+          completedTasks: 1,
+        },
+      },
+      { $sort: { name: 1 } },
+    ]);
+    res
+      .status(200)
+      .json({
+        members: membersWithTaskCount,
+        totalMembers: membersWithTaskCount.length,
+      });
   } catch (error) {
-    console.error('Erro ao buscar membros do usuário:', error.message);
-    res.status(500).json({ message: 'Erro interno do servidor ao buscar membros.' });
+    console.error("Erro ao buscar membros:", error.message);
+    res
+      .status(500)
+      .json({ message: "Erro interno do servidor ao buscar membros." });
   }
 };
 
@@ -90,23 +120,21 @@ exports.getUserMembers = async (req, res) => {
  * @access  Private
  */
 exports.getMemberById = async (req, res) => {
-  const memberId = req.params.id;
-  const createdByUserId = req.user.id;
-
   try {
-    if (!mongoose.Types.ObjectId.isValid(memberId)) {
-        return res.status(400).json({ message: 'ID do membro inválido.' });
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "ID de membro inválido." });
     }
-
-    const member = await Member.findOne({ _id: memberId, createdByUserId });
+    const member = await Member.findOne({
+      _id: req.params.id,
+      createdByUserId: req.user.id,
+    });
     if (!member) {
-      return res.status(404).json({ message: 'Membro não encontrado ou não pertence a você.' });
+      return res.status(404).json({ message: "Membro não encontrado." });
     }
     res.status(200).json(member);
-
   } catch (error) {
-    console.error('Erro ao buscar membro por ID:', error.message);
-    res.status(500).json({ message: 'Erro interno do servidor ao buscar membro.' });
+    console.error("Erro ao buscar membro por ID:", error.message);
+    res.status(500).json({ message: "Erro interno do servidor." });
   }
 };
 
@@ -116,43 +144,50 @@ exports.getMemberById = async (req, res) => {
  * @access  Private
  */
 exports.updateMember = async (req, res) => {
-  const memberId = req.params.id;
-  const createdByUserId = req.user.id;
   const { name, email, role } = req.body;
-
   try {
-    if (!mongoose.Types.ObjectId.isValid(memberId)) {
-        return res.status(400).json({ message: 'ID do membro inválido.' });
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "ID de membro inválido." });
     }
-
-    let member = await Member.findOne({ _id: memberId, createdByUserId });
+    if (name !== undefined && (!name || name.trim().length < 3)) {
+      return res
+        .status(400)
+        .json({
+          message: "O nome do membro deve ter pelo menos 3 caracteres.",
+        });
+    }
+    const member = await Member.findOne({
+      _id: req.params.id,
+      createdByUserId: req.user.id,
+    });
     if (!member) {
-      return res.status(404).json({ message: 'Membro não encontrado ou não pertence a você.' });
+      return res.status(404).json({ message: "Membro não encontrado." });
     }
-
-    // Opcional: Se o email for alterado, verificar se o novo email já está em uso por outro membro deste usuário
-    if (email && email !== member.email) {
-        const existingMemberByEmail = await Member.findOne({ email, createdByUserId, _id: { $ne: memberId } });
-        if (existingMemberByEmail) {
-            return res.status(400).json({ message: 'Outro membro seu já utiliza este email.' });
-        }
-        member.email = email;
+    if (email && email.trim() !== "" && email !== member.email) {
+      const existingMemberByEmail = await Member.findOne({
+        email: email.trim(),
+        createdByUserId: req.user.id,
+        _id: { $ne: req.params.id },
+      });
+      if (existingMemberByEmail) {
+        return res
+          .status(400)
+          .json({ message: "Outro membro seu já utiliza este email." });
+      }
     }
-
-    // Atualizar campos
-    if (name) member.name = name;
-    if (role !== undefined) member.role = role; // Permite string vazia para limpar o cargo
-
+    member.name = name?.trim() ?? member.name;
+    member.email = email?.trim() ?? member.email;
+    member.role = role?.trim() ?? member.role;
     const updatedMember = await member.save();
-    res.status(200).json({ member: updatedMember, message: 'Membro atualizado com sucesso!' });
-
+    res
+      .status(200)
+      .json({
+        member: updatedMember,
+        message: "Membro atualizado com sucesso!",
+      });
   } catch (error) {
-    console.error('Erro ao atualizar membro:', error.message);
-     if (error.name === 'ValidationError') {
-        const messages = Object.values(error.errors).map(val => val.message);
-        return res.status(400).json({ message: messages.join(' ') });
-    }
-    res.status(500).json({ message: 'Erro interno do servidor ao atualizar membro.' });
+    console.error("Erro ao atualizar membro:", error.message);
+    res.status(500).json({ message: "Erro interno do servidor." });
   }
 };
 
@@ -162,34 +197,25 @@ exports.updateMember = async (req, res) => {
  * @access  Private
  */
 exports.deleteMember = async (req, res) => {
-  const memberId = req.params.id;
-  const createdByUserId = req.user.id;
-
   try {
-    if (!mongoose.Types.ObjectId.isValid(memberId)) {
-        return res.status(400).json({ message: 'ID do membro inválido.' });
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "ID de membro inválido." });
     }
-
-    const member = await Member.findOne({ _id: memberId, createdByUserId });
+    const member = await Member.findOne({
+      _id: req.params.id,
+      createdByUserId: req.user.id,
+    });
     if (!member) {
-      return res.status(404).json({ message: 'Membro não encontrado ou não pertence a você.' });
+      return res.status(404).json({ message: "Membro não encontrado." });
     }
-
-    // Antes de deletar o membro, decidir o que fazer com as tarefas atribuídas a ele.
-    // Opção 1: Desatribuir as tarefas (setar assignedToMemberId para null)
     await Task.updateMany(
-      { userId: createdByUserId, assignedToMemberId: memberId },
-      { $set: { assignedToMemberId: null } }
+      { userId: req.user.id },
+      { $pull: { assignedMemberIds: req.params.id } }
     );
-    // Opção 2: Deletar as tarefas atribuídas (CUIDADO: pode ser destrutivo)
-    // await Task.deleteMany({ userId: createdByUserId, assignedToMemberId: memberId });
-
-    await member.deleteOne();
-    res.status(200).json({ message: 'Membro deletado com sucesso e tarefas foram desatribuídas.' });
-
+    await Member.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Membro deletado com sucesso." });
   } catch (error) {
-    console.error('Erro ao deletar membro:', error.message);
-    res.status(500).json({ message: 'Erro interno do servidor ao deletar membro.' });
+    console.error("Erro ao deletar membro:", error.message);
+    res.status(500).json({ message: "Erro interno do servidor." });
   }
 };
-

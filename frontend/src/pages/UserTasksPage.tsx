@@ -1,74 +1,63 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { FormEvent } from 'react'; // <--- CORRIGIDO
-import { Link } from 'react-router-dom';
+import type { FormEvent } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
+import TaskCard from '../components/tasks/TaskCard';
 
-interface Task {
+// Tipos de dados (mantendo consistência)
+export interface Member { _id: string; name: string; }
+export interface Task {
   _id: string;
   title: string;
   description?: string;
   status: 'pendente' | 'em_andamento' | 'concluida' | 'arquivada';
   priority: 'baixa' | 'media' | 'alta';
-  assignedToMemberId?: { _id: string; name: string; } | string | null;
+  assignedMemberIds: Member[];
   dueDate?: string;
   createdAt: string;
   updatedAt: string;
 }
-
-interface TasksApiResponse {
-  tasks: Task[];
-  currentPage: number;
-  totalPages: number;
-  totalTasks: number;
-}
-
-interface Member {
-  _id: string;
-  name: string;
-}
-
-interface MembersApiResponse {
-  members: Member[];
-}
-
+interface TasksApiResponse { tasks: Task[]; totalTasks: number; }
+interface MembersApiResponse { members: Member[]; }
 interface TaskFormData {
   title: string;
   description: string;
-  status: 'pendente' | 'em_andamento' | 'concluida' | 'arquivada';
   priority: 'baixa' | 'media' | 'alta';
-  assignedToMemberId: string | null;
-  dueDate: string;
+  assignedMemberIds: string[];
+  dueDate?: string;
 }
 
 const initialTaskFormData: TaskFormData = {
-  title: '',
-  description: '',
-  status: 'pendente',
-  priority: 'media',
-  assignedToMemberId: null,
-  dueDate: '',
+  title: '', description: '', priority: 'media', assignedMemberIds: [], dueDate: '',
+};
+
+// Funções auxiliares para datas
+const getTomorrowDateString = () => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return tomorrow.toISOString().split('T')[0];
+};
+const getMaxDateString = () => {
+  const maxDate = new Date();
+  maxDate.setFullYear(maxDate.getFullYear() + 5);
+  return maxDate.toISOString().split('T')[0];
 };
 
 const UserTasksPage: React.FC = () => {
   const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [availableMembers, setAvailableMembers] = useState<Member[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-
-  const [isFormModalOpen, setIsFormModalOpen] = useState<boolean>(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create');
   const [currentTaskData, setCurrentTaskData] = useState<TaskFormData>(initialTaskFormData);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
-
-  const [availableMembers, setAvailableMembers] = useState<Member[]>([]);
-  const [isSubmittingForm, setIsSubmittingForm] = useState<boolean>(false);
-
+  const [isDeleting, setIsDeleting] = useState(false);
   const formDialogRef = useRef<HTMLDialogElement>(null);
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
 
@@ -79,47 +68,42 @@ const UserTasksPage: React.FC = () => {
       const response = await api.get<TasksApiResponse>('/tasks');
       setTasks(response.data.tasks);
     } catch (err: any) {
-      console.error('Erro ao buscar tarefas:', err);
       setError(err.response?.data?.message || 'Não foi possível carregar as tarefas.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const fetchMembers = async () => {
+    if (availableMembers.length > 0) return;
+    try {
+      const response = await api.get<MembersApiResponse>('/members');
+      setAvailableMembers(response.data.members);
+    } catch (err) {
+      console.error('Erro ao buscar membros:', err);
+      if (isFormModalOpen) setFormError('Não foi possível carregar a equipe.');
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchTasks();
+      fetchMembers();
     } else {
       setIsLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  useEffect(() => {
-    const fetchMembers = async () => {
-      if (!isFormModalOpen || availableMembers.length > 0) return;
-      try {
-        const response = await api.get<MembersApiResponse>('/members');
-        setAvailableMembers(response.data.members);
-      } catch (err) {
-        console.error('Erro ao buscar membros para atribuição:', err);
-      }
-    };
-    fetchMembers();
-  }, [isFormModalOpen, availableMembers.length]);
-
-  const openFormModal = (mode: 'create' | 'edit', task?: Task) => {
+  const handleOpenFormModal = (mode: 'create' | 'edit', task?: Task) => {
     setModalMode(mode);
     setFormError(null);
     if (mode === 'edit' && task) {
       setCurrentTaskData({
         title: task.title,
         description: task.description || '',
-        status: task.status,
         priority: task.priority,
-        assignedToMemberId: typeof task.assignedToMemberId === 'object' 
-                            ? task.assignedToMemberId?._id || null 
-                            : task.assignedToMemberId || null,
+        assignedMemberIds: task.assignedMemberIds.map(member => member._id),
         dueDate: task.dueDate ? task.dueDate.split('T')[0] : '',
       });
       setEditingTaskId(task._id);
@@ -131,233 +115,211 @@ const UserTasksPage: React.FC = () => {
     formDialogRef.current?.showModal();
   };
 
-  const closeFormModal = () => {
+  const handleCloseFormModal = () => {
     setIsFormModalOpen(false);
     formDialogRef.current?.close();
-    setEditingTaskId(null);
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setCurrentTaskData(prev => ({ ...prev, [name]: value }));
+    if (name === 'assignedMemberIds' && e.target instanceof HTMLSelectElement) {
+      const selectedIds = Array.from(e.target.selectedOptions, option => option.value);
+      setCurrentTaskData(prev => ({ ...prev, assignedMemberIds: selectedIds }));
+    } else {
+      setCurrentTaskData(prev => ({ ...prev, [name]: value }));
+    }
   };
-
+  
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
     setIsSubmittingForm(true);
 
-    if (!currentTaskData.title.trim()) {
-      setFormError('O título da tarefa é obrigatório.');
+    // Validação de nome com mínimo de 3 caracteres
+    if (!currentTaskData.title.trim() || currentTaskData.title.trim().length < 3) {
+      setFormError('O título da tarefa é obrigatório e deve ter pelo menos 3 caracteres.');
       setIsSubmittingForm(false);
       return;
     }
 
-    const payload: Partial<TaskFormData> = { ...currentTaskData };
+    const payload: Partial<TaskFormData> & { status?: string } = { ...currentTaskData };
     if (!payload.description?.trim()) payload.description = '';
-    if (!payload.dueDate) delete payload.dueDate;
-    if (payload.assignedToMemberId === '' || payload.assignedToMemberId === null) {
-      payload.assignedToMemberId = null;
+    
+    // Validação de data
+    if (payload.dueDate) {
+        const tomorrow = new Date(getTomorrowDateString());
+        const selectedDate = new Date(payload.dueDate + 'T00:00:00');
+        if (selectedDate < tomorrow) {
+            setFormError('A data de vencimento não pode ser hoje ou no passado.');
+            setIsSubmittingForm(false);
+            return;
+        }
+    } else {
+        delete payload.dueDate; // Remove o campo se estiver vazio
     }
 
     try {
       if (modalMode === 'create') {
-        await api.post<{ task: Task; message: string }>('/tasks', payload);
+        payload.status = 'pendente'; // Status padrão na criação
+        await api.post('/tasks', payload);
       } else if (modalMode === 'edit' && editingTaskId) {
-        await api.put<{ task: Task; message: string }>(`/tasks/${editingTaskId}`, payload);
+        await api.put(`/tasks/${editingTaskId}`, payload);
       }
-      fetchTasks(); 
-      closeFormModal();
+      fetchTasks();
+      handleCloseFormModal();
     } catch (err: any) {
-      console.error(`Erro ao ${modalMode === 'create' ? 'criar' : 'editar'} tarefa:`, err);
-      setFormError(err.response?.data?.message || `Não foi possível ${modalMode === 'create' ? 'criar' : 'editar'} a tarefa.`);
+      setFormError(err.response?.data?.message || `Não foi possível ${modalMode} a tarefa.`);
     } finally {
       setIsSubmittingForm(false);
     }
   };
 
-  const openDeleteModal = (task: Task) => {
+  const handleOpenDeleteModal = (task: Task) => {
     setTaskToDelete(task);
     setIsDeleteModalOpen(true);
     deleteDialogRef.current?.showModal();
   };
 
-  const closeDeleteModal = () => {
+  const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false);
     deleteDialogRef.current?.close();
-    setTaskToDelete(null);
   };
 
-  const confirmDeleteTask = async () => {
+  const handleConfirmDeleteTask = async () => {
     if (!taskToDelete) return;
     setIsDeleting(true);
-    setError(null); 
+    setError(null);
     try {
       await api.delete(`/tasks/${taskToDelete._id}`);
-      setTasks(prevTasks => prevTasks.filter(t => t._id !== taskToDelete._id));
-      closeDeleteModal();
+      setTasks(prev => prev.filter(t => t._id !== taskToDelete._id));
+      handleCloseDeleteModal();
     } catch (err: any) {
-      console.error('Erro ao excluir tarefa:', err);
       setError(err.response?.data?.message || 'Não foi possível excluir a tarefa.');
-      closeDeleteModal(); 
+      handleCloseDeleteModal();
     } finally {
       setIsDeleting(false);
     }
   };
 
-  if (isLoading && tasks.length === 0) {
-    return <article aria-busy="true">A carregar tarefas...</article>;
-  }
+  // FILTRAGEM: Exibe apenas tarefas pendentes ou em andamento nesta página.
+  const activeTasks = tasks.filter(task => task.status === 'pendente' || task.status === 'em_andamento');
 
-  if (error && tasks.length === 0) { 
-    return (
-      <article>
-        <hgroup>
-          <h2>Erro ao Carregar Tarefas</h2>
-          <p style={{ color: 'var(--pico-form-element-invalid-active-border-color, red)' }}>{error}</p>
-        </hgroup>
-        <Link to="/dashboard" role="button" className="secondary">Voltar ao Dashboard</Link>
-      </article>
-    );
+  if (isLoading) {
+    return <article aria-busy="true">Carregando tarefas...</article>;
   }
 
   return (
     <article>
       <hgroup>
-        <h1>Minhas Tarefas</h1>
-        <h2>Organize e acompanhe as suas atividades aqui.</h2>
+        <h1>Minhas Tarefas Ativas</h1>
+        <p>Crie e gerencie suas atividades pendentes e em andamento aqui.</p>
       </hgroup>
 
-      {error && tasks.length > 0 && (
-         <aside style={{ backgroundColor: 'var(--pico-error-background)', color: 'var(--pico-error-color)', padding: '1rem', marginBottom: '1rem', border: '1px solid var(--pico-error-border)', borderRadius: 'var(--pico-border-radius)'}}>
-            <strong>Erro:</strong> {error}
+      {error && (
+        <aside style={{ backgroundColor: 'var(--pico-color-red-200)', padding: '1rem', marginBottom: '1rem', border: '1px solid var(--pico-color-red-500)', borderRadius: 'var(--pico-border-radius)'}}>
+          <strong>Erro:</strong> {error}
         </aside>
       )}
 
-      <p>
-        <button onClick={() => openFormModal('create')} disabled={isFormModalOpen || isDeleteModalOpen}>
-          + Criar Nova Tarefa
-        </button>
-      </p>
+      <button onClick={() => handleOpenFormModal('create')} disabled={isFormModalOpen || isDeleteModalOpen}>
+        + Criar Nova Tarefa
+      </button>
 
-      <dialog ref={formDialogRef} onClose={closeFormModal}>
+      {/* Modal de Criar/Editar Tarefa */}
+      <dialog ref={formDialogRef} onClose={handleCloseFormModal}>
         <article>
           <header>
-            <a href="#close" aria-label="Fechar" className="close" onClick={(e) => { e.preventDefault(); closeFormModal(); }}></a>
+            <a href="#close" aria-label="Fechar" className="close" onClick={handleCloseFormModal}></a>
             <h3>{modalMode === 'create' ? 'Criar Nova Tarefa' : 'Editar Tarefa'}</h3>
           </header>
           <form onSubmit={handleFormSubmit}>
-            <label htmlFor="title">
-              Título da Tarefa*
-              <input type="text" id="title" name="title" value={currentTaskData.title} onChange={handleFormChange} required placeholder="Ex: Desenvolver funcionalidade X"/>
-            </label>
-            <label htmlFor="description">
-              Descrição
-              <textarea id="description" name="description" value={currentTaskData.description} onChange={handleFormChange} rows={3} placeholder="Detalhes sobre a tarefa..."></textarea>
-            </label>
+            <label htmlFor="title">Título* (mín. 3 caracteres)</label>
+            <input type="text" id="title" name="title" value={currentTaskData.title} onChange={handleFormChange} required minLength={3} />
+            
+            <label htmlFor="description">Descrição</label>
+            <textarea id="description" name="description" value={currentTaskData.description} onChange={handleFormChange} rows={3}></textarea>
+            
             <div className="grid">
-              <label htmlFor="status">Status</label>
-              <select id="status" name="status" value={currentTaskData.status} onChange={handleFormChange}>
-                  <option value="pendente">Pendente</option>
-                  <option value="em_andamento">Em Andamento</option>
-                  <option value="concluida">Concluída</option>
-                  <option value="arquivada">Arquivada</option>
-              </select>
-              <label htmlFor="priority">Prioridade</label>
-              <select id="priority" name="priority" value={currentTaskData.priority} onChange={handleFormChange}>
-                  <option value="baixa">Baixa</option>
-                  <option value="media">Média</option>
-                  <option value="alta">Alta</option>
-              </select>
-            </div>
-            <div className="grid">
-              <label htmlFor="assignedToMemberId">
-                Atribuir a (Membro)
-                <select id="assignedToMemberId" name="assignedToMemberId" value={currentTaskData.assignedToMemberId || ''} onChange={handleFormChange}>
-                  <option value="">Ninguém (pessoal)</option>
-                  {availableMembers.map(member => ( <option key={member._id} value={member._id}>{member.name}</option> ))}
+                <label htmlFor="priority">Prioridade</label>
+                <select id="priority" name="priority" value={currentTaskData.priority} onChange={handleFormChange}>
+                    <option value="baixa">Baixa</option>
+                    <option value="media">Média</option>
+                    <option value="alta">Alta</option>
                 </select>
-              </label>
-              <label htmlFor="dueDate">
-                Data de Vencimento
-                <input type="date" id="dueDate" name="dueDate" value={currentTaskData.dueDate} onChange={handleFormChange} />
-              </label>
+                <label htmlFor="dueDate">Data de Vencimento</label>
+                <input
+                  type="date" id="dueDate" name="dueDate" value={currentTaskData.dueDate || ''}
+                  onChange={handleFormChange} min={getTomorrowDateString()} max={getMaxDateString()}
+                />
             </div>
-            {formError && (<p style={{ color: 'var(--pico-form-element-invalid-active-border-color, red)' }}>{formError}</p>)}
+            
+            <label htmlFor="assignedMemberIds">Atribuir a (Segure Ctrl/Cmd para múltiplos)</label>
+            <select
+              multiple id="assignedMemberIds" name="assignedMemberIds"
+              value={currentTaskData.assignedMemberIds} onChange={handleFormChange} style={{ height: '150px' }}
+            >
+              {availableMembers.map(member => (
+                <option key={member._id} value={member._id}>{member.name}</option>
+              ))}
+            </select>
+            
+            {formError && <p style={{ color: 'var(--pico-color-red-500)' }}>{formError}</p>}
+            
             <footer>
-              <button type="button" className="secondary outline" onClick={closeFormModal} disabled={isSubmittingForm}>Cancelar</button>
+              <button type="button" className="secondary outline" onClick={handleCloseFormModal} disabled={isSubmittingForm}>Cancelar</button>
               <button type="submit" aria-busy={isSubmittingForm} disabled={isSubmittingForm}>
-                {isSubmittingForm ? (modalMode === 'create' ? 'A criar...' : 'A guardar...') : (modalMode === 'create' ? 'Criar Tarefa' : 'Guardar Alterações')}
+                {isSubmittingForm ? (modalMode === 'create' ? 'Criando...' : 'Salvando...') : (modalMode === 'create' ? 'Criar Tarefa' : 'Salvar Alterações')}
               </button>
             </footer>
           </form>
         </article>
       </dialog>
 
-      <dialog ref={deleteDialogRef} onClose={closeDeleteModal}>
+      {/* Modal de Exclusão */}
+      <dialog ref={deleteDialogRef} onClose={handleCloseDeleteModal}>
         <article>
           <header>
-            <a href="#close" aria-label="Fechar" className="close" onClick={(e) => { e.preventDefault(); closeDeleteModal(); }}></a>
+            <a href="#close" aria-label="Fechar" className="close" onClick={handleCloseDeleteModal}></a>
             <h3>Confirmar Exclusão</h3>
           </header>
-          <p>
-            Tem a certeza de que deseja excluir a tarefa "<strong>{taskToDelete?.title}</strong>"?
-            Esta ação não pode ser desfeita.
-          </p>
+          <p>Tem certeza que deseja excluir a tarefa "<strong>{taskToDelete?.title}</strong>"?</p>
           <footer>
-            <button type="button" className="secondary outline" onClick={closeDeleteModal} disabled={isDeleting}>
-              Cancelar
-            </button>
-            <button type="button" className="contrast" onClick={confirmDeleteTask} aria-busy={isDeleting} disabled={isDeleting}>
-              {isDeleting ? 'A excluir...' : 'Excluir Tarefa'}
+            <button type="button" className="secondary" onClick={handleCloseDeleteModal} disabled={isDeleting}>Cancelar</button>
+            <button className="contrast" onClick={handleConfirmDeleteTask} aria-busy={isDeleting} disabled={isDeleting}>
+              {isDeleting ? '' : 'Excluir Tarefa'}
             </button>
           </footer>
         </article>
       </dialog>
 
-      {tasks.length === 0 && !isLoading && (<p>Você ainda não tem nenhuma tarefa registada. Que tal criar uma?</p>)}
-      {tasks.length > 0 && (
-        <div className="overflow-auto">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Título</th>
-                <th scope="col">Status</th>
-                <th scope="col">Prioridade</th>
-                <th scope="col">Vencimento</th>
-                <th scope="col">Atribuída a</th>
-                <th scope="col">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tasks.map((task) => (
-                <tr key={task._id}>
-                  <td>{task.title}</td>
-                  <td>{task.status.replace('_', ' ')}</td>
-                  <td>{task.priority}</td>
-                  <td>{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}</td>
-                  <td>
-                    {typeof task.assignedToMemberId === 'object' && task.assignedToMemberId?.name 
-                      ? task.assignedToMemberId.name 
-                      : 'Ninguém'
-                    }
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button className="outline secondary" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}} onClick={() => openFormModal('edit', task)}>
-                        Editar
-                      </button>
-                      <button className="outline contrast" style={{padding: '0.25rem 0.5rem', fontSize: '0.8rem'}} onClick={() => openDeleteModal(task)}>
-                        Excluir
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {/* Layout de Cards para Tarefas */}
+      <section style={{ marginTop: '2rem' }}>
+        {tasks.length === 0 && !isLoading ? (
+          <p>Você ainda não tem tarefas. Que tal criar uma?</p>
+        ) : activeTasks.length === 0 ? (
+          <article style={{ textAlign: 'center' }}>
+            <p>Ótimo trabalho! Você não tem tarefas pendentes ou em andamento.</p>
+          </article>
+        ) : (
+          // CORREÇÃO: Estilo inline para criar uma grade responsiva que quebra a linha
+          <div 
+            className="grid" 
+            style={{
+              gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+              gap: '1.5rem'
+            }}
+          >
+            {activeTasks.map((task) => (
+              <TaskCard
+                key={task._id}
+                task={task}
+                onEdit={() => handleOpenFormModal('edit', task)}
+                onDelete={() => handleOpenDeleteModal(task)}
+              />
+            ))}
+          </div>
+        )}
+      </section>
     </article>
   );
 };

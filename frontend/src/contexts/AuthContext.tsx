@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import type { ReactNode } from 'react'; // <--- CORRIGIDO
+import type { ReactNode } from 'react';
 import api from '../services/api';
 
 interface User {
