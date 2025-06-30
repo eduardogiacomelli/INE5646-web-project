@@ -174,6 +174,3 @@ Se desejar contribuir, siga o modelo Fork & Pull Request:
 
 ---
 
-## Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
