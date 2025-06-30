@@ -7,7 +7,11 @@
 ![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)
 
 Uma aplicação Full-Stack para gerenciamento de tarefas e equipes, desenvolvida para a disciplina de INE5646 - Programação para Web na UFSC.
+<br>
+
 Para acessar a aplicação primeiro conecte-se ao VPN da UFSC
+
+
 **[Acesse a Aplicação Online](https://ine5646.e.w.giacomelli.vms.ufsc.br/)**
 
 ---
