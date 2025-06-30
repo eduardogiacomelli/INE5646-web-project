@@ -114,7 +114,7 @@ Para executar uma versão de desenvolvimento deste projeto em sua máquina, siga
 1.  Clone o repositório:
 2.  Acesse a pasta do backend
     ```bash
-    cd SEU_REPOSITORIO/backend
+    cd projeto-web/backend
     ```
 
 3.  Instale as dependências do NPM:
