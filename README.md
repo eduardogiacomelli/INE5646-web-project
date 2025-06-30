@@ -29,11 +29,12 @@ Uma aplicação Full-Stack para gerenciamento de tarefas e equipes, desenvolvida
 ---
 
 
+
 ## Sobre o Projeto
 
-Este projeto é um **Sistema Gerenciador de Tarefas** completo, construído com uma arquitetura moderna e segura. Ele permite que usuários se cadastrem, criem equipes, gerenciem membros e atribuam tarefas complexas com prazos, prioridades e status.
+Este projeto é um **Sistema Gerenciador de Tarefas**. Ele permite que usuários se cadastrem, criem equipes, gerenciem membros e atribuam tarefas complexas com prazos, prioridades e status.
 
-O foco principal foi desenvolver uma aplicação robusta, escalável e segura, aplicando os conceitos de desenvolvimento Full-Stack aprendidos na disciplina, desde a configuração do servidor até a criação de uma interface de usuário reativa e intuitiva.
+O foco principal foi desenvolver uma aplicação Full-Stack, desde a configuração do servidor até a criação de uma interface de usuário reativa e intuitiva.
 
 ![Screenshot da Aplicação](https://github.com/user-attachments/assets/cb156750-6f2e-4f3e-b75a-9027126f0e86) 
 *(Dashboard do site)*
@@ -47,7 +48,22 @@ O foco principal foi desenvolver uma aplicação robusta, escalável e segura, a
 -   **Painel de Monitoramento:** Uma visão geral (Kanban) de todas as tarefas, agrupadas por status, para fácil gerenciamento do fluxo de trabalho.
 -   **Design Responsivo:** Interface construída para funcionar de forma agradável tanto em desktops quanto em dispositivos móveis.
 
+### Páginas do site
+![Página dos membros](https://github.com/user-attachments/assets/4b0e4d85-f894-4444-aeae-9ba1b09df8c6)
+*Permite criar seus membros*
+
+![Página das tarefas](https://github.com/user-attachments/assets/9a5f6213-4c74-481a-a586-c7b7c5f2f62c)
+*Crie as tarefas que você precisa realizar*
+
+![Página de acompanhamento das tarefas](https://github.com/user-attachments/assets/2cc53835-11c2-436d-9e46-850176a5cfa3)
+*Atualize e acompanhe o andamento de suas tarefas*
+
+<hr>
+
 ### Tecnologias Utilizadas
+
+
+
 
 O projeto foi construído utilizando um ecossistema de tecnologias modernas para o desenvolvimento web:
 
@@ -92,17 +108,17 @@ Para executar uma versão de desenvolvimento deste projeto em sua máquina, siga
 ### Instalação do Backend
 
 1.  Clone o repositório:
+2.  Acesse a pasta do backend
     ```bash
-    git clone [https://github.com/eduardogiacomelli/INE5646-web-project.git](https://github.com/eduardogiacomelli/INE5646-web-project.git)
     cd SEU_REPOSITORIO/backend
     ```
 
-2.  Instale as dependências do NPM:
+3.  Instale as dependências do NPM:
     ```bash
     npm install
     ```
 
-3.  Crie um arquivo `.env` na raiz da pasta `backend/` e adicione as seguintes variáveis:
+4.  Crie um arquivo `.env` na raiz da pasta `backend/` e adicione as seguintes variáveis:
     ```env
     NODE_ENV=development
     PORT=3001
@@ -111,7 +127,7 @@ Para executar uma versão de desenvolvimento deste projeto em sua máquina, siga
     FRONTEND_URL=http://localhost:5173
     ```
 
-4.  Inicie o servidor backend:
+5.  Inicie o servidor backend:
     ```bash
     npm start
     ```
