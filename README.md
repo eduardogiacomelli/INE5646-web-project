@@ -28,14 +28,15 @@ Uma aplicação Full-Stack para gerenciamento de tarefas e equipes, desenvolvida
 
 ---
 
+
 ## Sobre o Projeto
 
 Este projeto é um **Sistema Gerenciador de Tarefas** completo, construído com uma arquitetura moderna e segura. Ele permite que usuários se cadastrem, criem equipes, gerenciem membros e atribuam tarefas complexas com prazos, prioridades e status.
 
 O foco principal foi desenvolver uma aplicação robusta, escalável e segura, aplicando os conceitos de desenvolvimento Full-Stack aprendidos na disciplina, desde a configuração do servidor até a criação de uma interface de usuário reativa e intuitiva.
 
-![Screenshot da Aplicação](https://i.imgur.com/uG9a7hA.png) 
-*(Sugestão: tire um print da sua tela de dashboard e substitua o link acima)*
+![Screenshot da Aplicação](https://github.com/user-attachments/assets/cb156750-6f2e-4f3e-b75a-9027126f0e86) 
+*(Dashboard do site)*
 
 ### Principais Funcionalidades
 
@@ -92,7 +93,7 @@ Para executar uma versão de desenvolvimento deste projeto em sua máquina, siga
 
 1.  Clone o repositório:
     ```bash
-    git clone [https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git](https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git)
+    git clone [https://github.com/eduardogiacomelli/INE5646-web-project.git](https://github.com/eduardogiacomelli/INE5646-web-project.git)
     cd SEU_REPOSITORIO/backend
     ```
 
