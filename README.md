@@ -173,7 +173,7 @@ Se desejar contribuir, siga o modelo Fork & Pull Request:
 
 ## Autores
 
--   **Eduardo Wallner Giacomelli** - [GitHub](https://github.com/eduardo-w-giacomelli)
+-   **Eduardo Wallner Giacomelli** - [GitHub](https://github.com/eduardogiacomelli)
 -   **Matias Adrian Fuks** - [GitHub](https://github.com/Matias-Fuks)
 
 ---
